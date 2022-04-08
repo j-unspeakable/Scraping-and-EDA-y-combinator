@@ -72,8 +72,8 @@ def infinite_scroll(driver):
         print("Loading took too much time!!. Please refresh.")
 
 
-# FUNCTION TO GET THE URL OF ALL COMPANIES
-def get_company_url():
+# FUNCTION TO GET THE URL AND LOCATION OF ALL COMPANIES
+def get_company_url_and_country():
 
     homepage = browser_setup()
     infinite_scroll(homepage)
@@ -93,10 +93,18 @@ def get_company_url():
         sites.append(site_mod)
         count += 1
 
+         # Extract location.
+        hold = link.find('span', class_='styles-module__coLocation___yhKam')
+        Location.append(hold.text)
+
+        # Extract the country of each company.
+        country = str(hold.text).split(",")[-1].strip()
+        Country.append(country)
+
     # Count number of links.
     print(f"\nCompanies total:", count)
     print('\n')
-    return sites 
+    return sites
 
 
 # INITIATE PLACEHOLDER LISTS
@@ -106,6 +114,7 @@ Short_description = []
 Founded = []
 Team_size = []
 Location = []
+Country = []
 Website = [] 
 Active_founders = []
 Social_media_company = []
@@ -147,10 +156,7 @@ def get_companies_info(soup):
             Team_size.append(j.text)
 
     # Location.
-    select = select.next_sibling
-    for j in select:
-        if j.text != 'Location:':
-            Location.append(j.text)
+    # Check the function get_company_url_and_country.
     
     # Website.
     for j in soup.find('div', class_ = "flex flex-row items-center leading-none px-3"):
@@ -265,7 +271,7 @@ conn = internet_on()
 start_thread = dt.now()
 
 # Get company links.
-links = get_company_url()
+links = get_company_url_and_country()
 
 
 if conn is True:
@@ -291,9 +297,9 @@ else:
 
 
 # STORE EXTRACTED DATA IN A DATAFRAME.
-d = zip(Company_name, Company_tag, Short_description, Founded, Location, Team_size, Website, Active_founders, Social_media_company, Founders_info, Description)
+d = zip(Company_name, Company_tag, Short_description, Founded, Location, Country, Team_size, Website, Active_founders, Social_media_company, Founders_info, Description)
 mapped = list(d)
-df = pd.DataFrame(mapped, columns=['Company_name','Company_tag', 'Short_description', 'Founded', 'Location', 'Team_size', 'Website', 'Active_founders', 'Company_social_media', 'Founders_info', 'Description'])
+df = pd.DataFrame(mapped, columns=['Company_name','Company_tag', 'Short_description', 'Founded', 'Location', 'Country', 'Team_size', 'Website', 'Active_founders', 'Company_social_media', 'Founders_info', 'Description'])
 
 # EXPORT DATAFRAME TO CSV.
 df.to_csv('ycombinator.csv')
