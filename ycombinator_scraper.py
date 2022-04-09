@@ -1,4 +1,5 @@
 # IMPORT LIBRARIES
+from socket import socket
 import pandas as pd
 import requests
 import re
@@ -12,6 +13,8 @@ from selenium.webdriver.common.by import By
 from IPython.display import Image
 from datetime import datetime as dt
 import time
+import socket
+import concurrent.futures as cf
 
 # FUNCTION TO CHECK THE INTERNET CONNECTIVITY
 import urllib.request
@@ -250,16 +253,13 @@ def scrape_info(url):
         get_companies_info(soup)
         get_founders_info(soup)
     
-    except Exception as e:
-        print(e)
+    except (socket.gaierror, ConnectionError):
         unscraped_sites.append(url)
 
     return unscraped_sites
 
 
 # SCRAPE DATA WITH MULTI-THREADING
-import concurrent.futures as cf
-
 run = True
 unscraped_sites = []
 i = 0
@@ -270,12 +270,11 @@ conn = internet_on()
 # Start timer.
 start_thread = dt.now()
 
-# Get company links.
-links = get_company_url_and_country()
-
-
 if conn is True:
-    
+
+    # Get company links.
+    links = get_company_url_and_country()
+
     while run:
         
         with cf.ThreadPoolExecutor() as executor:
